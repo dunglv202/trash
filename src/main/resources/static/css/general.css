@@ -1,0 +1,42 @@
+
+
+input:not(input[type="checkbox"], input[type="radio"]) {
+    padding: 0.7rem;
+    margin: 0.5rem 0;
+    width: 100%;
+    box-sizing: border-box;
+    border: solid 2px lightslategray;
+    border-radius: 3px;
+}
+
+input:focus {
+    border-color: cornflowerblue !important;
+    outline: solid 3px #a0c0fc;
+}
+
+input[type="submit"], button {
+    background: cornflowerblue;
+    border-style: solid;
+    border-color: cornflowerblue !important;
+    border-radius: 3px;
+    font-weight: bold;
+    color: white;
+}
+
+input[type="submit"]:hover, button:hover {
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+a {
+    color: cornflowerblue;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+hr {
+    margin: 1rem;
+}

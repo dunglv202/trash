@@ -1,6 +1,9 @@
 package com.example.shop.entity;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 @Entity
@@ -12,15 +15,17 @@ public class User {
     private Integer id;
 
     @Column(name = "username")
+    @NotEmpty(message = "Username mustn't be empty")
     private String username;
 
     @Column(name = "password")
+    @Size(min = 4, message = "Password must be at least {min} character long")
     private String password;
 
     @Column(name = "enabled")
-    private boolean enabled;
+    private boolean enabled = true;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_details_id")
     private UserDetails userDetails;
 

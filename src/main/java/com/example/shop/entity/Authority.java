@@ -1,6 +1,7 @@
 package com.example.shop.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "authorities")
@@ -11,6 +12,7 @@ public class Authority {
     private Integer id;
 
     @Column(name = "name")
+    @NotEmpty(message = "Authority name mustn't be empty")
     private String name;
 
     @Column(name = "description")

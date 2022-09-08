@@ -1,6 +1,8 @@
 package com.example.shop.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "user_details")
@@ -14,9 +16,11 @@ public class UserDetails {
     private String firstName;
 
     @Column(name = "last_name")
+    @NotEmpty(message = "Last name mustn't be empty")
     private String lastName;
 
     @Column(name = "email")
+    @Pattern(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email address")
     private String email;
 
     public UserDetails() {
