@@ -54,10 +54,15 @@
 			<scope>test</scope>
 		</dependency>
 
-<!--		Validation-->
+<!--	Validation-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+<!--	AspectJ, Spring AOP-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
 	</dependencies>
 
