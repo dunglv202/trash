@@ -11,6 +11,7 @@ import com.example.shop.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -33,8 +34,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> getMultipleProducts(Pageable page) {
-        return productRepo.findAll(page);
+    public Page<Product> getMultipleProducts(Pageable pagination) {
+        return productRepo.findAll(pagination);
+    }
+
+    @Override
+    public Page<Product> getMultipleProducts(Specification<Product> spec, Pageable pagination) {
+        return productRepo.findAll(spec, pagination);
     }
 
     @Override
@@ -71,6 +77,12 @@ public class ProductServiceImpl implements ProductService {
         Product foundProduct = productRepo.findById(productId).orElseThrow(() -> new ProductNotExistsException("id: " + productId));
         productRepo.delete(foundProduct);
         return foundProduct;
+    }
+
+    @Override
+    public Page<Product> search(String keyword, Pageable pagination) {
+        if (keyword==null || keyword.equals("")) return getMultipleProducts(pagination);
+        return productRepo.search(keyword, pagination);
     }
 
     private void assembleProduct(Product product) {

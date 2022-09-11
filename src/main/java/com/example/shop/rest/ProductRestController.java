@@ -1,11 +1,12 @@
 package com.example.shop.rest;
 
-import com.example.shop.entity.Category;
 import com.example.shop.entity.Product;
 import com.example.shop.service.ProductService;
+import com.example.shop.spec.ProductSpecifications;
+import com.example.shop.spec.model.ProductSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Controller;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +22,20 @@ public class ProductRestController {
     }
 
     @GetMapping("")
-    public List<Product> getMultipleProduct(@RequestParam(value = "page", defaultValue = "1") int pageNumber,
-                                            @RequestParam(value = "itemPerPage", defaultValue = "5") int itemPerPage) {
-        return productService.getMultipleProducts(PageRequest.of(pageNumber-1, itemPerPage)).toList();
+    public List<Product> getMultipleProduct(@RequestParam(value = "page", defaultValue = "1") int page,
+                                            @RequestParam(value = "pageSize", defaultValue = "5") int pageSize,
+                                            @RequestParam(value = "search", required = false) String search,
+                                            ProductSpec productSpec,
+                                            @RequestParam(value = "sortedBy", required = false) String sortedField,
+                                            @RequestParam(value = "desc", required = false) String sortDescending) {
+        // if no search param is provided, ignore that
+        if (search == null) productSpec.setKeyword(null);
+
+        // declare sorting
+        Sort sort = Sort.by(sortedField);
+        if (sortDescending != null) sort = sort.descending();
+
+        return productService.getMultipleProducts(ProductSpecifications.matchesSpec(productSpec), PageRequest.of(page-1, pageSize).withSort(sort)).toList();
     }
 
     @GetMapping("/{productId}")
