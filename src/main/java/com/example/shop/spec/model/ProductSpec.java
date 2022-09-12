@@ -21,6 +21,7 @@ public class ProductSpec {
 
     public void setMinPrice(Double minPrice) {
         this.minPrice = minPrice;
+        if (minPrice == null) this.minPrice = 0.0;
     }
 
     public Double getMaxPrice() {
@@ -29,6 +30,7 @@ public class ProductSpec {
 
     public void setMaxPrice(Double maxPrice) {
         this.maxPrice = maxPrice;
+        if (maxPrice == null) this.maxPrice = Double.MAX_VALUE;
     }
 
     public Integer getCategory() {
