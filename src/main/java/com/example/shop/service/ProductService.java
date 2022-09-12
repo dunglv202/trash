@@ -9,7 +9,6 @@ import org.springframework.data.jpa.domain.Specification;
 import javax.validation.Valid;
 
 public interface ProductService {
-    Page<Product> getMultipleProducts(Pageable pagination);
     Page<Product> getMultipleProducts(Specification<Product> spec, Pageable pagination);
     Product getSingleProduct(int productId);
     Product addNewProduct(@Valid Product product);
