@@ -38,7 +38,7 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public Brand addBrand(@Valid Brand newBrand) {
         // ensure new brand will be created
-        newBrand.setId(1);
+        newBrand.setId(null);
 
         return brandRepo.save(newBrand);
     }
