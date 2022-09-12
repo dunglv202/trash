@@ -6,6 +6,7 @@ import com.example.shop.spec.ProductSpecifications;
 import com.example.shop.spec.model.ProductSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,20 +23,27 @@ public class ProductRestController {
     }
 
     @GetMapping("")
-    public List<Product> getMultipleProduct(@RequestParam(value = "page", defaultValue = "1") int page,
-                                            @RequestParam(value = "pageSize", defaultValue = "5") int pageSize,
+    public List<Product> getMultipleProduct(@RequestParam(value = "page", defaultValue = "0") int page,
+                                            @RequestParam(value = "size", defaultValue = "5") int pageSize,
                                             @RequestParam(value = "search", required = false) String search,
-                                            ProductSpec productSpec,
-                                            @RequestParam(value = "sortedBy", required = false) String sortedField,
-                                            @RequestParam(value = "desc", required = false) String sortDescending) {
-        // if no search param is provided, ignore that
+                                            @RequestParam(value = "sortedBy", required = false) String sortedBy,
+                                            @RequestParam(value = "desc", required = false) String desc,
+                                            ProductSpec productSpec) {
+        // if no search param is provided, ignore keyword param
         if (search == null) productSpec.setKeyword(null);
 
-        // declare sorting
-        Sort sort = Sort.by(sortedField);
-        if (sortDescending != null) sort = sort.descending();
+        // make pagination instance
+        Pageable pagination = PageRequest.of(page, pageSize);
+        Sort sort;
+        if (sortedBy != null) {
+            sort = Sort.by(sortedBy);
+            if (desc != null) {
+                sort = sort.descending();
+            }
+            pagination = PageRequest.of(page, pageSize).withSort(sort);
+        }
 
-        return productService.getMultipleProducts(ProductSpecifications.matchesSpec(productSpec), PageRequest.of(page-1, pageSize).withSort(sort)).toList();
+        return productService.getMultipleProducts(ProductSpecifications.withSpec(productSpec), pagination).toList();
     }
 
     @GetMapping("/{productId}")

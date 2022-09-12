@@ -2,8 +2,8 @@ package com.example.shop.spec.model;
 
 public class ProductSpec {
     private String keyword;
-    private Double minPrice = 0.0;
-    private Double maxPrice = Double.MAX_VALUE;
+    private Double minPrice;
+    private Double maxPrice;
     private Integer category;
     private Integer brand;
 
