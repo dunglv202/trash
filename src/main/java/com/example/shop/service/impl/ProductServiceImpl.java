@@ -35,11 +35,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> getMultipleProducts(Pageable pagination) {
-        return productRepo.findAll(pagination);
-    }
-
-    @Override
     public Page<Product> getMultipleProducts(Specification<Product> spec, Pageable pagination) {
         return productRepo.findAll(spec, pagination);
     }
