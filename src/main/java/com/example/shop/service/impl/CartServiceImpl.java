@@ -80,7 +80,7 @@ public class CartServiceImpl implements CartService {
         CartItem foundItem = cartItemRepo.findById(itemId).orElseThrow(() -> new ItemNotExistsException("id: " + itemId));
 
         // if item belongs to logged user, delete that
-        if (foundItem.getUser().equals(user))
+        if (!foundItem.getUser().equals(user))
             throw new ItemNotExistsException("id: " + itemId);
 
         cartItemRepo.delete(foundItem);
