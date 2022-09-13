@@ -64,6 +64,10 @@ public class CartServiceImpl implements CartService {
         // check if item exists
         CartItem foundItem = cartItemRepo.findById(item.getId()).orElseThrow(()->new ItemNotExistsException("Id: " + item.getId()));
 
+        // authorization
+        if(!foundItem.getUser().equals(user))
+            throw new ItemNotExistsException("id: " + item.getId());
+
         // update quantity
         foundItem.setQuantity(item.getQuantity());
         foundItem = cartItemRepo.save(foundItem);
@@ -74,6 +78,10 @@ public class CartServiceImpl implements CartService {
     public CartItem removeItem(int itemId, User user) {
         // check if item exist
         CartItem foundItem = cartItemRepo.findById(itemId).orElseThrow(() -> new ItemNotExistsException("id: " + itemId));
+
+        // if item belongs to logged user, delete that
+        if (foundItem.getUser().equals(user))
+            throw new ItemNotExistsException("id: " + itemId);
 
         cartItemRepo.delete(foundItem);
 
