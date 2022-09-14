@@ -111,4 +111,8 @@ public class Order {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public Double getTotal() {
+        return itemSet.stream().map(OrderItem::getTotal).reduce(Double::sum).get();
+    }
 }

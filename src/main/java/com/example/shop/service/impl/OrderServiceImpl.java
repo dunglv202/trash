@@ -6,18 +6,23 @@ import com.example.shop.entity.Product;
 import com.example.shop.entity.User;
 import com.example.shop.exception.InsufficientQuantityException;
 import com.example.shop.exception.ItemNotExistsException;
+import com.example.shop.model.Email;
 import com.example.shop.repository.OrderRepository;
+import com.example.shop.service.EmailService;
 import com.example.shop.service.OrderService;
 import com.example.shop.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import com.example.shop.utils.AuthenticationUtils;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.Optional;
@@ -29,11 +34,15 @@ import java.util.Set;
 public class OrderServiceImpl implements OrderService {
     private OrderRepository orderRepo;
     private ProductService productService;
+    private EmailService emailService;
+    private TemplateEngine templateEngine;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepo, ProductService productService) {
+    public OrderServiceImpl(OrderRepository orderRepo, ProductService productService, EmailService emailService, TemplateEngine templateEngine) {
         this.orderRepo = orderRepo;
         this.productService = productService;
+        this.emailService = emailService;
+        this.templateEngine = templateEngine;
     }
 
     @Override
@@ -64,7 +73,12 @@ public class OrderServiceImpl implements OrderService {
 
         // make sure that order is newly created
         order.setId(null);
-        return orderRepo.save(order);
+        order = orderRepo.save(order);
+
+        // send email to user
+        sendNotificationEmail(order);
+
+        return order;
     }
 
     @Override
@@ -91,5 +105,25 @@ public class OrderServiceImpl implements OrderService {
             item.setProduct(product);
             item.setOrder(order);
         });
+    }
+
+    private void sendNotificationEmail(Order order) {
+        Email templatedEmail = new Email();
+        templatedEmail.setRecipient(order.getUser().getUserDetails().getEmail());
+        templatedEmail.setSubject("Make order #" + order.getId() + " successfully - TheHeckShop");
+
+        // get html content from thymeleaf template
+        Context context = new Context();
+        context.setVariable("order", order);
+
+        String emailContent = templateEngine.process("make-order-email", context);
+        templatedEmail.setContent(emailContent);
+
+        try {
+            emailService.sendEmail(templatedEmail);
+        } catch (MessagingException e) {
+            System.err.println("Unable to send email to " + templatedEmail.getRecipient());
+            e.printStackTrace();
+        }
     }
 }

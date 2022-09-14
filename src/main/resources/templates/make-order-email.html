@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th = "http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .items th, .items td {
+            padding: 0.5rem;
+            border: solid 2px #333333;
+        }
+        .items th {
+            background: cornflowerblue;
+            color: white;
+            padding: 1rem 0.5rem;
+        }
+        table.items {
+            border-collapse: collapse;
+        }
+        .items td:nth-child(3n) {
+            text-align: center;
+        }
+        .items td:nth-child(2n) {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <table th:object="${order}">
+        <tr>
+            <h2 th:text="|Hi, ${order.user.username}|"></h2>
+            <p>You have successfully made an order at TheHeckShop.com, details:</p>
+            <div>
+                <p th:utext="|Delivery To: ${order.deliveryLocation}|"></p>
+                <p th:utext="|Phone Number: ${order.recipientPhoneNumber}|"></p>
+            </div>
+        </tr>
+        <tr>
+            <table class="items">
+                <tr>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+                <tr th:each="item : ${order.itemSet}">
+                    <td th:text="${item.product.name}"></td>
+                    <td th:text="${#numbers.formatCurrency(item.product.price)}"></td>
+                    <td th:text="${item.quantity}"></td>
+                    <td th:text="${#numbers.formatCurrency(item.getTotal())}"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: center">
+                        Total
+                    </td>
+                    <td th:text="${#numbers.formatCurrency(order.getTotal())}"></td>
+                </tr>
+            </table>
+        </tr>
+    </table>
+</body>
+</html>
