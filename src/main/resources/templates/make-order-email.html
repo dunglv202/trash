@@ -35,8 +35,8 @@
             <h2 th:text="|Hi, ${order.user.username}|"></h2>
             <p>You have successfully made an order at TheHeckShop.com, details:</p>
             <div>
-                <p th:text="|Delivery To: ${order.deliveryLocation}|"></p>
-                <p th:text="|Phone Number: ${order.recipientPhoneNumber}|"></p>
+                <p th:text="|Delivery To: ${order.recipient.address}|"></p>
+                <p th:text="|Phone Number: ${order.recipient.phoneNumber}|"></p>
                 <p th:text="|Created at: ${#temporals.format(order.dateCreated, 'dd/MM/yyyy HH:mm')}|"></p>
             </div>
         </tr>
@@ -58,7 +58,7 @@
                     <td colspan="3" style="text-align: center">
                         Total
                     </td>
-                    <td th:text="${#numbers.formatCurrency(order.getTotal())}"></td>
+                    <td th:text="${#numbers.formatCurrency(0)}"></td>
                 </tr>
             </table>
         </tr>
