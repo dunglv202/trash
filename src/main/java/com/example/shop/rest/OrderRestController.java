@@ -3,7 +3,6 @@ package com.example.shop.rest;
 import com.example.shop.entity.Order;
 import com.example.shop.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +11,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/orders")
+@CrossOrigin
 public class OrderRestController {
-/*make order
-* cancel order
-* */
     private OrderService orderService;
 
     @Autowired
@@ -38,6 +35,12 @@ public class OrderRestController {
     @PostMapping("")
     public Order makeOrder(@RequestBody Order order, Authentication auth) {
         return orderService.makeOrder(order, auth);
+    }
+
+    @PutMapping("/{orderId}")
+    public Order updateOrderStatus(@PathVariable("orderId") Integer orderId, @RequestBody Order order, Authentication auth) {
+        order.setId(orderId);
+        return orderService.updateOrderStatus(order, auth);
     }
 
     @DeleteMapping("/{orderId}")

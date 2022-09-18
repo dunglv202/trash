@@ -1,5 +1,8 @@
 package com.example.shop.entity;
 
+import com.example.shop.exception.InsufficientQuantityException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -89,6 +92,7 @@ public class Product {
         this.thumbnail = thumbnail;
     }
 
+    @JsonIgnore
     public Integer getInStockQuantity() {
         return inStockQuantity;
     }
@@ -129,5 +133,13 @@ public class Product {
         this.price = (this.price == null) ? that.price : this.price;
         this.category = (this.category == null) ? that.category : this.category;
         this.brand = (this.brand == null) ? that.brand : this.brand;
+    }
+
+    public Integer changeQuantity(Integer amount) {
+        if (this.inStockQuantity + amount >= 0)
+            this.inStockQuantity += amount;
+        else throw new InsufficientQuantityException("Product ID: " + this.id);
+
+        return inStockQuantity;
     }
 }

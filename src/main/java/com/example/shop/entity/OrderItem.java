@@ -1,7 +1,6 @@
 package com.example.shop.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
@@ -21,12 +20,12 @@ public class OrderItem {
     private Product product;
 
     @Column(name = "quantity")
+    @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Invalid quantity")
     private Integer quantity;
 
     @ManyToOne
     @JoinColumn(name = "order_id")
-    @JsonIgnore
     private Order order;
 
     public OrderItem() {
@@ -63,6 +62,7 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
+    @JsonIgnore
     public Order getOrder() {
         return order;
     }

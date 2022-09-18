@@ -12,4 +12,5 @@ public interface OrderService {
     Order getOrder(Integer orderId, Authentication auth);
     Order makeOrder(@Valid Order order, Authentication auth);
     Order cancelOrder(Integer orderId, Authentication auth);
+    Order updateOrderStatus(Order order, Authentication auth);
 }

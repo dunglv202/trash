@@ -14,7 +14,6 @@ import com.example.shop.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -91,6 +90,15 @@ public class OrderServiceImpl implements OrderService {
         return foundOrder;
     }
 
+    @Override
+    public Order updateOrderStatus(Order order, Authentication auth) {
+        return null;
+    }
+
+    /**
+     * Traverse all order item, check if there are enough quantity and save all item to order_items
+     * @Exception: InsufficientQuantityException
+     **/
     private void processOrder(Order order) {
         Set<OrderItem> itemSet = order.getItemSet();
         itemSet.forEach(item -> {
@@ -100,7 +108,9 @@ public class OrderServiceImpl implements OrderService {
             if (product.getInStockQuantity() < item.getQuantity())
                 throw new InsufficientQuantityException("Product - ID: " + product.getId());
 
-            // else save order item
+            // else update quantity, save order item
+            product.changeQuantity(-item.getQuantity());
+
             item.setId(null);
             item.setProduct(product);
             item.setOrder(order);

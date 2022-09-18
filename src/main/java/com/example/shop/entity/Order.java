@@ -1,12 +1,14 @@
 package com.example.shop.entity;
 
+import com.example.shop.enumtype.OrderStatus;
+import com.example.shop.enumtype.PaymentMethod;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -19,40 +21,48 @@ public class Order {
     private Integer id;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @NotNull(message = "Order must contain at least 1 item")
+    @NotNull(message = "Item set must be specified")
+    @Size(min = 1, message = "Order must contain at least 1 item")
     private Set<@Valid OrderItem> itemSet;
 
-    @Column(name = "delivery_location")
-    @NotEmpty(message = "Delivery location must be specified")
-    private String deliveryLocation;
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
+    @JoinColumn(name = "recipient_id")
+    @NotNull(message = "Recipient must be specified")
+    @Valid
+    private Recipient recipient;
 
-    @Column(name = "recipient_phone_number")
-    @NotEmpty(message = "Phone number mustn't be empty")
-    private String recipientPhoneNumber;
+    @Column(name = "additional_notes")
+    private String notes;
+
+    @Column(name = "payment_method")
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Payment method must be specified")
+    private PaymentMethod paymentMethod;
 
     @Column(name = "date_created")
     @CreationTimestamp
     private LocalDateTime dateCreated;
 
     @Column(name = "status")
-    @NotEmpty(message = "Order status mustn't be empty")
-    private String status;
+    @Enumerated(EnumType.STRING)
+//    @NotNull(message = "Order status is required")
+    private OrderStatus orderStatus = OrderStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    @JsonIgnore
     private User user;
 
     public Order() {
     }
 
-    public Order(Integer id, Set<OrderItem> itemList, String deliveryLocation, String recipientPhoneNumber, LocalDateTime dateCreated, String status, User user) {
+    public Order(Integer id, Set<@Valid OrderItem> itemSet, Recipient recipient, String notes, PaymentMethod paymentMethod, LocalDateTime dateCreated, OrderStatus orderStatus, User user) {
         this.id = id;
-        this.itemSet = itemList;
-        this.deliveryLocation = deliveryLocation;
-        this.recipientPhoneNumber = recipientPhoneNumber;
+        this.itemSet = itemSet;
+        this.recipient = recipient;
+        this.notes = notes;
+        this.paymentMethod = paymentMethod;
         this.dateCreated = dateCreated;
-        this.status = status;
+        this.orderStatus = orderStatus;
         this.user = user;
     }
 
@@ -68,24 +78,32 @@ public class Order {
         return itemSet;
     }
 
-    public void setItemSet(Set<OrderItem> itemList) {
-        this.itemSet = itemList;
+    public void setItemSet(Set<OrderItem> itemSet) {
+        this.itemSet = itemSet;
     }
 
-    public String getDeliveryLocation() {
-        return deliveryLocation;
+    public Recipient getRecipient() {
+        return recipient;
     }
 
-    public void setDeliveryLocation(String deliveryLocation) {
-        this.deliveryLocation = deliveryLocation;
+    public void setRecipient(Recipient recipient) {
+        this.recipient = recipient;
     }
 
-    public String getRecipientPhoneNumber() {
-        return recipientPhoneNumber;
+    public String getNotes() {
+        return notes;
     }
 
-    public void setRecipientPhoneNumber(String recipientPhoneNumber) {
-        this.recipientPhoneNumber = recipientPhoneNumber;
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public LocalDateTime getDateCreated() {
@@ -96,23 +114,20 @@ public class Order {
         this.dateCreated = dateCreated;
     }
 
-    public String getStatus() {
-        return status;
+    public OrderStatus getOrderStatus() {
+        return orderStatus;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setOrderStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
     }
 
+    @JsonIgnore
     public User getUser() {
         return user;
     }
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public Double getTotal() {
-        return itemSet.stream().map(OrderItem::getTotal).reduce(Double::sum).get();
     }
 }
