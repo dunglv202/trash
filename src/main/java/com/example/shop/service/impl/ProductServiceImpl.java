@@ -58,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product updateProduct(@Valid Product product) {
         final int productId = product.getId();
-        productRepo.findById(product.getId()).orElseThrow(() -> new ProductNotExistsException("id: " + productId));
+        productRepo.findById(productId).orElseThrow(() -> new ProductNotExistsException("id: " + productId));
 
         assembleProduct(product);
 
@@ -75,9 +75,11 @@ public class ProductServiceImpl implements ProductService {
         return foundProduct;
     }
 
+    /**
+     * Check if valid product (exist category & brand)
+     * @Exception BrandNotExistsException, CategoryNotExistsException
+     **/
     private void assembleProduct(Product product) {
-        // check if valid product (exist category & brand)
-        // if invalid => category and brand service will throw exception
         Category category = categoryService.getCategory(product.getCategory().getId());
         product.setCategory(category);
 
