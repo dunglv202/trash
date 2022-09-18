@@ -1,11 +1,11 @@
 package com.example.shop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import javax.validation.GroupSequence;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 
 @Entity
@@ -29,7 +29,7 @@ public class CartItem {
 
     @Column(name = "quantity")
     @NotNull(message = "Quantity must be specified", groups = {onCreation.class, onUpdate.class})
-    @PositiveOrZero(message = "Invalid quantity", groups = {onCreation.class, onUpdate.class})
+    @Positive(message = "Invalid quantity", groups = {onCreation.class, onUpdate.class})
     private Integer quantity;
 
     @Column(name = "date_created")
@@ -55,6 +55,7 @@ public class CartItem {
         this.id = id;
     }
 
+    @JsonIgnore
     public User getUser() {
         return user;
     }
@@ -85,5 +86,9 @@ public class CartItem {
 
     public void setDateCreated(LocalDateTime dateCreated) {
         this.dateCreated = dateCreated;
+    }
+
+    public Double getTotal() {
+        return this.product.getPrice() * this.quantity;
     }
 }

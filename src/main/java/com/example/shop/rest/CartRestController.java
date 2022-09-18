@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/carts")
+@CrossOrigin
 public class CartRestController {
     private CartService cartService;
 
@@ -24,8 +25,8 @@ public class CartRestController {
     @GetMapping("")
     public List<CartItem> getMultipleItems(Authentication auth,
                                            @RequestParam(value = "page", defaultValue = "0") int page,
-                                           @RequestParam(value = "itemPerPage", defaultValue = "20") int itemsPerPage) {
-        Pageable pagination = PageRequest.of(page, itemsPerPage);
+                                           @RequestParam(value = "size", defaultValue = "20") int size) {
+        Pageable pagination = PageRequest.of(page, size);
         return cartService.getMultipleItems(getUser(auth), pagination).toList();
     }
 

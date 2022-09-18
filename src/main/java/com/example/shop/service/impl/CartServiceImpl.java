@@ -45,6 +45,13 @@ public class CartServiceImpl implements CartService {
     @Override
     @Validated({CartItem.onCreation.class})
     public CartItem addNewItem(@Valid CartItem item, User user) {
+        // if product was already in the cart, just update quantity
+        CartItem foundItem = cartItemRepo.findCartItemByProduct(item.getProduct());
+        if (foundItem != null) {
+            foundItem.setQuantity(item.getQuantity());
+            return cartItemRepo.save(foundItem);
+        }
+
         // assemble item with logged user and found product
         item.setUser(user);
 
