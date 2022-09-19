@@ -92,7 +92,6 @@ public class Product {
         this.thumbnail = thumbnail;
     }
 
-    @JsonIgnore
     public Integer getInStockQuantity() {
         return inStockQuantity;
     }
