@@ -27,3 +27,11 @@ CREATE TABLE `order_items` (
     CONSTRAINT `fk_order_items_products` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
     CONSTRAINT `fk_order_items_orders` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
 );
+
+CREATE TABLE `product_images` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `file_name` VARCHAR(128) NOT NULL,
+    `product_id` INT NOT NULL,
+
+    CONSTRAINT `fk_product_images_products` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`)
+);

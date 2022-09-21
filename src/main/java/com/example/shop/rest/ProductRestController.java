@@ -1,6 +1,7 @@
 package com.example.shop.rest;
 
 import com.example.shop.entity.Product;
+import com.example.shop.entity.ProductImage;
 import com.example.shop.service.ProductService;
 import com.example.shop.spec.ProductSpecifications;
 import com.example.shop.spec.model.ProductSpec;
@@ -8,9 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -52,9 +58,29 @@ public class ProductRestController {
         return productService.getSingleProduct(productId);
     }
 
-    @PostMapping("")
-    public Product addNewProduct(@RequestBody Product product) {
-        return productService.addNewProduct(product);
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Map<String, Object> addNewProduct(@RequestPart("product") Product product,
+                                             @RequestPart(value = "images", required = false) MultipartFile... images) {
+        // save product first
+        product = productService.addNewProduct(product);
+
+        // add images for created product
+        Map<String, ProductImage> imageList = productService.addAllImages(product.getId(), images);
+
+        // set thumbnail if valid
+        ProductImage thumb = imageList.get(product.getThumbnail());
+        if (thumb != null) {
+            product.setThumbnail(thumb.getFileName());
+        } else {
+            product.setThumbnail("undefined.jpg");
+        }
+        product = productService.updateProduct(product);
+
+        // generate returning result
+        Map<String, Object> result = new HashMap<>();
+        result.put("product", product);
+        result.put("images", imageList);
+        return result;
     }
 
     @PutMapping("/{productId}")
@@ -66,5 +92,20 @@ public class ProductRestController {
     @DeleteMapping("/{productId}")
     public Product deleteProduct(@PathVariable("productId") Integer productId) {
         return productService.deleteProduct(productId);
+    }
+
+
+    // Images related
+    @GetMapping("/{productId}/images")
+    public List<ProductImage> getAllProductImages(@PathVariable("productId") Integer productId,
+                                                  @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                  @RequestParam(value = "size", defaultValue = "20") Integer size) {
+        return productService.getAllImages(productId, PageRequest.of(page, size)).toList();
+    }
+
+    @PostMapping(value = "/{productId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Collection<ProductImage> addMultipleImages(@RequestPart("images") MultipartFile[] files,
+                                                      @PathVariable("productId") Integer productId) {
+        return productService.addAllImages(productId, files).values();
     }
 }
