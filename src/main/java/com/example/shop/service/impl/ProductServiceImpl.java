@@ -3,43 +3,30 @@ package com.example.shop.service.impl;
 import com.example.shop.entity.Brand;
 import com.example.shop.entity.Category;
 import com.example.shop.entity.Product;
-import com.example.shop.entity.ProductImage;
 import com.example.shop.exception.ProductNotExistsException;
-import com.example.shop.repository.ProductImageRepository;
 import com.example.shop.repository.ProductRepository;
-import com.example.shop.service.BrandService;
-import com.example.shop.service.CategoryService;
-import com.example.shop.service.ProductService;
-import com.example.shop.service.StorageService;
-import com.example.shop.utils.FileUtils;
+import com.example.shop.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.io.IOException;
-import java.util.*;
 
 @Service
 @Transactional
 @Validated
 public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepo;
-    private ProductImageRepository productImageRepo;
-    private StorageService storageService;
     private CategoryService categoryService;
     private BrandService brandService;
 
     @Autowired
-    public ProductServiceImpl(ProductRepository productRepo, ProductImageRepository productImageRepo, StorageService storageService, CategoryService categoryService, BrandService brandService) {
+    public ProductServiceImpl(ProductRepository productRepo, CategoryService categoryService, BrandService brandService) {
         this.productRepo = productRepo;
-        this.productImageRepo = productImageRepo;
-        this.storageService = storageService;
         this.categoryService = categoryService;
         this.brandService = brandService;
     }
@@ -80,45 +67,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product deleteProduct(Integer productId) {
+        // check if product exists
         Product foundProduct = productRepo.findById(productId).orElseThrow(() -> new ProductNotExistsException("id: " + productId));
+        // delete from database
         productRepo.delete(foundProduct);
         return foundProduct;
-    }
-
-    private ProductImage addImage(Integer productId, MultipartFile image) {
-        // check if product exists
-        Product product = getSingleProduct(productId);
-
-        // store image
-        String fileName = "undefined.jpg";
-        try {
-            fileName = storageService.save(image, FileUtils.FileType.IMAGE).getFileName().toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // save image info to db
-        ProductImage productImage = new ProductImage();
-        productImage.setId(null);
-        productImage.setFileName(fileName);
-        productImage.setProduct(product);
-
-        return productImageRepo.save(productImage);
-    }
-
-    @Override
-    public Map<String, ProductImage> addAllImages(Integer productId, MultipartFile[] images) {
-        Map<String, ProductImage> storedImages = new HashMap<>();
-        Arrays.stream(images).forEach(image -> {
-            storedImages.put(image.getOriginalFilename(), addImage(productId, image));
-        });
-        return storedImages;
-    }
-
-    @Override
-    public Page<ProductImage> getAllImages(Integer productId, Pageable pagination) {
-        Page<ProductImage> images = productImageRepo.findAllByProductId(productId, pagination);
-        return images;
     }
 
     /**

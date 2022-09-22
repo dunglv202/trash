@@ -89,6 +89,7 @@ public class Product {
     }
 
     public void setThumbnail(String thumbnail) {
+        if (thumbnail == null) thumbnail = "undefined.jpg";
         this.thumbnail = thumbnail;
     }
 
