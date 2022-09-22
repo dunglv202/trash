@@ -2,6 +2,7 @@ package com.example.shop.rest;
 
 import com.example.shop.entity.Product;
 import com.example.shop.entity.ProductImage;
+import com.example.shop.service.ProductImageService;
 import com.example.shop.service.ProductService;
 import com.example.shop.spec.ProductSpecifications;
 import com.example.shop.spec.model.ProductSpec;
@@ -13,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +21,16 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/products")
 @CrossOrigin
+// ???: user upload image with the same name with the old one in server
+
 public class ProductRestController {
     private ProductService productService;
+    private ProductImageService productImageService;
 
     @Autowired
-    public ProductRestController(ProductService productService) {
+    public ProductRestController(ProductService productService, ProductImageService productImageService) {
         this.productService = productService;
+        this.productImageService = productImageService;
     }
 
     @GetMapping("")
@@ -60,52 +64,56 @@ public class ProductRestController {
 
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, Object> addNewProduct(@RequestPart("product") Product product,
-                                             @RequestPart(value = "images", required = false) MultipartFile... images) {
-        // save product first
+                                 @RequestPart(value = "images", required = false) MultipartFile[] images) {
         product = productService.addNewProduct(product);
 
-        // add images for created product
-        Map<String, ProductImage> imageList = productService.addAllImages(product.getId(), images);
+        Map<String, ProductImage> storedImages = productImageService.addImages(product.getId(), images);
 
-        // set thumbnail if valid
-        ProductImage thumb = imageList.get(product.getThumbnail());
-        if (thumb != null) {
-            product.setThumbnail(thumb.getFileName());
-        } else {
-            product.setThumbnail("undefined.jpg");
-        }
-        product = productService.updateProduct(product);
-
-        // generate returning result
         Map<String, Object> result = new HashMap<>();
         result.put("product", product);
-        result.put("images", imageList);
+        result.put("images", storedImages);
+
         return result;
     }
 
-    @PutMapping("/{productId}")
-    public Product updateProduct(@PathVariable("productId") Integer productId, @RequestBody Product product) {
+    @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Map<String, Object> updateProduct(@PathVariable("productId") Integer productId,
+                                 @RequestPart("product") Product product,
+                                 @RequestPart(value = "images", required = false) MultipartFile[] images) {
         product.setId(productId);
-        return productService.updateProduct(product);
+        product = productService.updateProduct(product);
+
+        Map<String, ProductImage> storedImages = productImageService.addImages(productId, images);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("product", product);
+        result.put("images", storedImages);
+
+        return result;
     }
 
     @DeleteMapping("/{productId}")
     public Product deleteProduct(@PathVariable("productId") Integer productId) {
-        return productService.deleteProduct(productId);
-    }
+        // delete its images
+        productImageService.deleteAllImages(productId);
 
+        // delete product
+        Product product = productService.deleteProduct(productId);
+
+        return product;
+    }
 
     // Images related
     @GetMapping("/{productId}/images")
     public List<ProductImage> getAllProductImages(@PathVariable("productId") Integer productId,
                                                   @RequestParam(value = "page", defaultValue = "0") Integer page,
                                                   @RequestParam(value = "size", defaultValue = "20") Integer size) {
-        return productService.getAllImages(productId, PageRequest.of(page, size)).toList();
+        return productImageService.getAllImages(productId, PageRequest.of(page, size)).toList();
     }
 
     @PostMapping(value = "/{productId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Collection<ProductImage> addMultipleImages(@RequestPart("images") MultipartFile[] files,
+    public Map<String, ProductImage> addMultipleImages(@RequestPart("images") MultipartFile[] files,
                                                       @PathVariable("productId") Integer productId) {
-        return productService.addAllImages(productId, files).values();
+        return productImageService.addImages(productId, files);
     }
 }
